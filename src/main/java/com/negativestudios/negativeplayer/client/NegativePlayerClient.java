@@ -1,5 +1,6 @@
 package com.negativestudios.negativeplayer.client;
 
+import com.negativestudios.negativeplayer.NegativePlayer;
 import com.negativestudios.negativeplayer.network.PlaybackRequestPacket;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -14,7 +15,12 @@ public final class NegativePlayerClient {
     }
 
     public static void receive(PlaybackRequestPacket packet) {
-        // Intencionalmente silencioso: todavía no existe un backend de reproducción.
-        // No se muestra ningún mensaje de estado en el chat ni en la pantalla.
+        NegativePlayer.LOGGER.warn(
+                "Se recibió una solicitud de NegativePlayer en el cliente, pero el motor de reproducción "
+                        + "todavía no está implementado. fadeIn={} ticks, fadeOut={} ticks, volumen={}.",
+                packet.fadeInTicks(),
+                packet.fadeOutTicks(),
+                packet.volume()
+        );
     }
 }
