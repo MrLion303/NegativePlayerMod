@@ -52,15 +52,16 @@ repositories {
     mavenCentral()
     maven { url = 'https://maven.minecraftforge.net' }
     maven { url = 'https://api.modrinth.com/maven' }
+    maven { url = 'https://www.cursemaven.com' }
 }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.28'
 
     // MCEF se usa como biblioteca interna. El JAR se incluye dentro de NegativePlayer.
-    compileOnly fg.deobf('maven.modrinth:TObQ0HxZ:x91l6OKB')
-    jarJar('maven.modrinth:TObQ0HxZ:x91l6OKB') {
-        jarJar.pin(it, 'x91l6OKB')
+    compileOnly fg.deobf('curse.maven:mcef-636236:5828187')
+    jarJar('curse.maven:mcef-636236:[5828187,5828188)') {
+        jarJar.pin(it, '5828187')
     }
 }
 
