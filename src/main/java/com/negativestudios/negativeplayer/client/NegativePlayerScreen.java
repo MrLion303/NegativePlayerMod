@@ -127,9 +127,9 @@ public final class NegativePlayerScreen extends Screen {
                 + "}catch(e){}})();";
 
         try {
-            Vector<Long> frameIds = browser.getFrameIdentifiers();
+            Vector<String> frameIds = browser.getFrameIdentifiers();
             for (Long frameId : frameIds) {
-                CefFrame frame = browser.getFrame(frameId);
+                CefFrame frame = browser.getFrameByIdentifier(frameId);
                 if (frame != null && frame.isValid()) frame.executeJavaScript(script, "", 0);
             }
             if (frameIds.isEmpty()) {
@@ -144,9 +144,9 @@ public final class NegativePlayerScreen extends Screen {
     private void pollBrowserFrames() {
         if (browser == null) return;
         try {
-            Vector<Long> frameIds = browser.getFrameIdentifiers();
+            Vector<String> frameIds = browser.getFrameIdentifiers();
             for (Long frameId : frameIds) {
-                CefFrame frame = browser.getFrame(frameId);
+                CefFrame frame = browser.getFrameByIdentifier(frameId);
                 if (frame == null || !frame.isValid()) continue;
                 String frameUrl = frame.getURL();
                 if (frameUrl == null) continue;
@@ -225,7 +225,7 @@ public final class NegativePlayerScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         graphics.fill(0, 0, width, height, 0xFF000000);
 
-        if (browser != null && browser.getRenderer().getTextureID() != 0) {
+        if (browser != null && browser.isTextureReady() && browser.getRenderer().getTextureID() != 0) {
             RenderSystem.disableDepthTest();
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             RenderSystem.setShaderTexture(0, browser.getRenderer().getTextureID());
