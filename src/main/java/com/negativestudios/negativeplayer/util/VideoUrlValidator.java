@@ -42,7 +42,7 @@ public final class VideoUrlValidator {
             String id = extractYoutubeId(uri);
             if (id == null) throw new IllegalArgumentException("No se pudo extraer el ID del video de YouTube");
             return "https://www.youtube.com/embed/" + id
-                    + "?autoplay=0&controls=0&rel=0&modestbranding=1"
+                    + "?autoplay=0&controls=0&mute=1&rel=0&modestbranding=1"
                     + "&playsinline=1&disablekb=1&fs=0&iv_load_policy=3";
         }
 
