@@ -4,6 +4,7 @@ import de.keksuccino.rinku.Rinku;
 import de.keksuccino.rinku.RinkuBrowser;
 import com.negativestudios.negativeplayer.NegativePlayer;
 import com.negativestudios.negativeplayer.network.PlaybackRequestPacket;
+import com.negativestudios.negativeplayer.util.VideoUrlValidator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
