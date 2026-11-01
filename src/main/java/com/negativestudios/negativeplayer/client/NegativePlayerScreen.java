@@ -197,7 +197,7 @@ public final class NegativePlayerScreen extends Screen {
                 + "if(window.__npSetVolume){window.__npSetVolume(" + volume + ");}"
                 + "if(window.__npPlayer){"
                 + "if(" + shouldPlay + "){"
-                + "try{window.__npPlayer.setVolume(" + volume + ");window.__npPlayer.unMute();window.__npPlayer.playVideo();}catch(e){}"
+                + "try{window.__npPlayer.mute();window.__npPlayer.playVideo();}catch(e){}"
                 + "}else if(" + paused + "){try{window.__npPlayer.pauseVideo();}catch(e){}}"
                 + "}"
                 + "var npMark=function(s){try{window.name='negativeplayer:'+s;}catch(e){}"
