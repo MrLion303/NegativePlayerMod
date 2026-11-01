@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.negativestudios.negativeplayer.NegativePlayer;
 import com.negativestudios.negativeplayer.network.NegativePlayerNetwork;
 import com.negativestudios.negativeplayer.network.PlaybackRequestPacket;
 import com.negativestudios.negativeplayer.util.VideoUrlValidator;
@@ -73,6 +74,15 @@ public final class NegativePlayerCommand {
         for (ServerPlayer player : targets) {
             NegativePlayerNetwork.sendToPlayer(player, packet);
         }
+
+        NegativePlayer.LOGGER.info(
+                "Comando /negativeplayer ejecutado: solicitud enviada a {} jugador(es). Proveedor={}, fadeIn={} ticks, fadeOut={} ticks, volumen={}.",
+                targets.size(),
+                VideoUrlValidator.detectProvider(url),
+                fadeInTicks,
+                fadeOutTicks,
+                volume
+        );
 
         // Deliberadamente no se envía ningún mensaje de éxito al chat.
         return targets.size();
