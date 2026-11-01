@@ -41,11 +41,17 @@ Enlaces HTTPS aceptados:
 - YouTube: `youtube.com/watch?v=...`, `youtu.be/...`, `/shorts/`, `/live/` y `/embed/`.
 - Drive: `drive.google.com/file/d/ID/view`, `/preview`, `/open?id=...` y `/uc?id=...`.
 
-## Navegador integrado y primer inicio
+## Reproductor integrado y primer inicio
 
-NegativePlayer incluye **Rinku 3.0.4** como dependencia Jar-in-Jar; no necesitas instalar Rinku por separado. Rinku integra Chromium 151 y descarga el runtime nativo correspondiente al sistema operativo durante el primer inicio del cliente. Esta descarga inicial es grande, requiere internet y puede tardar; no es una descarga de video y solo se realiza una vez para cada versión/runtime.
+NegativePlayer distribuye su motor de navegador integrado en el propio JAR mediante Rinku 3.0.4. No necesitas descargar ni instalar otro archivo de mod para utilizar NegativePlayer.
 
-Plataformas de escritorio soportadas por Rinku: Windows 10/11, macOS 11+ y Linux glibc 2.31+ (x86_64/ARM64 según el runtime publicado). Android no es compatible.
+En el primer inicio del cliente, el motor descarga el runtime nativo de Chromium correspondiente al sistema operativo y lo guarda en la carpeta de datos de Minecraft. Esa descarga inicial es grande, requiere internet y puede tardar; no es una descarga de video. El runtime queda almacenado para los siguientes inicios.
+
+La página del reproductor se sirve desde una dirección local de loopback (127.0.0.1). En YouTube, esto proporciona el contexto HTTP Referer que requiere el reproductor integrado y permite controlar la reproducción mediante la API oficial de YouTube. Google Drive se muestra dentro de la misma página local.
+
+Plataformas de escritorio soportadas por el motor integrado: Windows 10/11, macOS 11+ y Linux glibc 2.31+ (x86_64/ARM64 según el runtime publicado). Android no es compatible.
+
+Nota técnica: el usuario instala un único JAR de NegativePlayer; internamente ese JAR incluye el componente de navegador y el motor descarga sus binarios nativos en el primer inicio.
 
 ## Sincronización y rendimiento
 
