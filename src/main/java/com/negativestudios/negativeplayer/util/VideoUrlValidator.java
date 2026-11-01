@@ -2,6 +2,7 @@ package com.negativestudios.negativeplayer.util;
 
 import java.net.URI;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Set;
@@ -34,6 +35,10 @@ public final class VideoUrlValidator {
     }
 
     public static String toPlayerUrl(String rawUrl) {
+        return toPlayerUrl(rawUrl, "http://127.0.0.1");
+    }
+
+    public static String toPlayerUrl(String rawUrl, String origin) {
         URI uri = parse(rawUrl);
         if (uri == null) throw new IllegalArgumentException("URL no válida");
 
@@ -41,9 +46,12 @@ public final class VideoUrlValidator {
         if (YOUTUBE_HOSTS.contains(host)) {
             String id = extractYoutubeId(uri);
             if (id == null) throw new IllegalArgumentException("No se pudo extraer el ID del video de YouTube");
+            String playerOrigin = origin == null || origin.isBlank() ? "http://127.0.0.1" : origin;
+            String encodedOrigin = URLEncoder.encode(playerOrigin, StandardCharsets.UTF_8);
             return "https://www.youtube.com/embed/" + id
                     + "?autoplay=0&controls=0&mute=1&rel=0&modestbranding=1"
-                    + "&playsinline=1&disablekb=1&fs=0&iv_load_policy=3";
+                    + "&playsinline=1&disablekb=1&fs=0&iv_load_policy=3"
+                    + "&enablejsapi=1&origin=" + encodedOrigin;
         }
 
         if (DRIVE_HOSTS.contains(host)) {
