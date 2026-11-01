@@ -31,13 +31,13 @@ jobs:
           gradle-version: '8.8'
 
       - name: Compilar mod
-        run: gradle build --no-daemon
+        run: gradle clean build jarJar --no-daemon
 
       - name: Publicar JAR
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: NegativePlayer-Forge-1.20.1
-          path: build/libs/*.jar
+          path: build/libs/*-all.jar
           if-no-files-found: error
           retention-days: 14

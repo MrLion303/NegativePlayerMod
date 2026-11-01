@@ -11,7 +11,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 import java.util.Optional;
 
 public final class NegativePlayerNetwork {
-    private static final String PROTOCOL_VERSION = "1";
+    private static final String PROTOCOL_VERSION = "2";
     private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(NegativePlayer.MOD_ID, "main"),
             () -> PROTOCOL_VERSION,
@@ -37,11 +37,23 @@ public final class NegativePlayerNetwork {
                 PlaybackRequestPacket::handle,
                 Optional.of(NetworkDirection.PLAY_TO_CLIENT)
         );
+        CHANNEL.registerMessage(
+                1,
+                PlaybackControlPacket.class,
+                PlaybackControlPacket::encode,
+                PlaybackControlPacket::decode,
+                PlaybackControlPacket::handle,
+                Optional.of(NetworkDirection.PLAY_TO_CLIENT)
+        );
 
         registered = true;
     }
 
     public static void sendToPlayer(ServerPlayer player, PlaybackRequestPacket packet) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
+    public static void sendControl(ServerPlayer player, PlaybackControlPacket packet) {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 }
