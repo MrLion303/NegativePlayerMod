@@ -33,6 +33,7 @@ public final class NegativePlayerScreen extends Screen {
     private boolean startRequested;
     private boolean paused;
     private boolean sawPlaying;
+    private boolean playbackVisible;
     private boolean closeIssued;
     private boolean worldAudioMuted;
     private boolean loggedTextureReady;
@@ -137,9 +138,23 @@ public final class NegativePlayerScreen extends Screen {
             if (ticks % 4 == 0) injectPlaybackScript();
             pollBrowserFrames();
 
-            if (startRequested && !sawPlaying && state != PlaybackState.STOPPING
-                    && System.nanoTime() - startRequestedAt > 120_000_000_000L) {
-                NegativePlayer.LOGGER.error("El reproductor no inició en 120 segundos. Comprueba que el video sea público, permita inserción y esté disponible.");
+            long now = System.nanoTime();
+            if (startRequested && state == PlaybackState.WAITING && browser.isTextureReady()
+                    && browser.getTextureIdentifier() != null
+                    && (sawPlaying || now - startRequestedAt >= 3_000_000_000L)) {
+                state = PlaybackState.PLAYING;
+                playbackVisible = true;
+                fadeInStartedAt = now;
+                if (!sawPlaying) {
+                    NegativePlayer.LOGGER.warn("No se recibió la señal de reproducción de YouTube/Drive; se mostrará la textura del navegador para evitar mantener la pantalla negra.");
+                } else {
+                    NegativePlayer.LOGGER.info("El video comenzó a reproducirse; iniciando fade in.");
+                }
+            }
+
+            if (startRequested && !playbackVisible && state != PlaybackState.STOPPING
+                    && now - startRequestedAt > 120_000_000_000L) {
+                NegativePlayer.LOGGER.error("Chromium no produjo una textura visible en 120 segundos. Revisa la inicialización del navegador y la carga del proveedor.");
                 requestStop();
             }
         }
@@ -235,8 +250,9 @@ public final class NegativePlayerScreen extends Screen {
                     if (!sawPlaying) {
                         sawPlaying = true;
                         state = PlaybackState.PLAYING;
+                        playbackVisible = true;
                         fadeInStartedAt = System.nanoTime();
-                        NegativePlayer.LOGGER.info("El video comenzó a reproducirse; iniciando fade in.");
+                        NegativePlayer.LOGGER.info("Chromium confirmó el inicio de reproducción; iniciando fade in.");
                     }
                 } else if (status.contains("negativeplayer:ended") || status.contains("#np-ended")) {
                     if (state != PlaybackState.STOPPING) {
@@ -285,7 +301,7 @@ public final class NegativePlayerScreen extends Screen {
 
     private int overlayAlpha() {
         long now = System.nanoTime();
-        if (state == PlaybackState.WAITING) return 255;
+        if (state == PlaybackState.WAITING) return 0;
 
         if (state == PlaybackState.STOPPING) {
             if (request.fadeOutTicks() == 0) return 255;
@@ -302,16 +318,22 @@ public final class NegativePlayerScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        graphics.fill(0, 0, width, height, 0xFF000000);
+        // Mientras el navegador se prepara, deja visible el mundo. La página no debe
+        // taparlo antes del tick programado de reproducción.
+        if (state == PlaybackState.WAITING) return;
 
-        if (browser != null && browser.isTextureReady()) {
-            ResourceLocation texture = browser.getTextureIdentifier();
-            int textureWidth = browser.getRenderer().getTextureWidth();
-            int textureHeight = browser.getRenderer().getTextureHeight();
+        if (playbackVisible) {
+            graphics.fill(0, 0, width, height, 0xFF000000);
 
-            if (texture != null && textureWidth > 0 && textureHeight > 0) {
-                graphics.blit(texture, 0, 0, 0.0F, 0.0F,
-                        width, height, textureWidth, textureHeight);
+            if (browser != null && browser.isTextureReady()) {
+                ResourceLocation texture = browser.getTextureIdentifier();
+                int textureWidth = browser.getRenderer().getTextureWidth();
+                int textureHeight = browser.getRenderer().getTextureHeight();
+
+                if (texture != null && textureWidth > 0 && textureHeight > 0) {
+                    graphics.blit(texture, 0, 0, 0.0F, 0.0F,
+                            width, height, textureWidth, textureHeight);
+                }
             }
         }
 
