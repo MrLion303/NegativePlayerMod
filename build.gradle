@@ -60,7 +60,7 @@ dependencies {
     // Rinku publica un artefacto Forge con versión semántica en su Maven oficial.
     compileOnly fg.deobf('de.keksuccino:rinku-forge:3.0.4-1.20.1')
     jarJar('de.keksuccino:rinku-forge:3.0.4-1.20.1') {
-        jarJar.pin(it, '3.0.4-1.20.1')
+        jarJar.pin(it, '3.0.4')
     }
 }
 
