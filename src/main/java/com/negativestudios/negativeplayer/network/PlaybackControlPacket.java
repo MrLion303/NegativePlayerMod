@@ -2,7 +2,6 @@ package com.negativestudios.negativeplayer.network;
 
 import com.negativestudios.negativeplayer.client.NegativePlayerClient;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.DecoderException;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
@@ -31,7 +30,7 @@ public record PlaybackControlPacket(Action action, int volume) {
     public static PlaybackControlPacket decode(FriendlyByteBuf buffer) {
         int id = buffer.readVarInt();
         if (id < 0 || id >= Action.values().length) {
-            throw new DecoderException("Unknown NegativePlayer control action: " + id);
+            throw new IllegalArgumentException("Unknown NegativePlayer control action: " + id);
         }
         return new PlaybackControlPacket(Action.values()[id], buffer.readVarInt());
     }

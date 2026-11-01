@@ -1,7 +1,7 @@
 package com.negativestudios.negativeplayer.client;
 
-import com.cinemamod.mcef.MCEF;
-import com.cinemamod.mcef.MCEFBrowser;
+import de.keksuccino.rinku.Rinku;
+import de.keksuccino.rinku.RinkuBrowser;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -26,7 +26,7 @@ public final class NegativePlayerScreen extends Screen {
     private final PlaybackRequestPacket request;
     private final Minecraft minecraft = Minecraft.getInstance();
 
-    private MCEFBrowser browser;
+    private RinkuBrowser browser;
     private PlaybackState state = PlaybackState.WAITING;
     private int volume;
     private int ticks;
@@ -49,7 +49,7 @@ public final class NegativePlayerScreen extends Screen {
         super.init();
         try {
             String playerUrl = VideoUrlValidator.toPlayerUrl(request.url());
-            browser = MCEF.createBrowser(playerUrl, false);
+            browser = Rinku.createBrowser(playerUrl, false);
             browser.useBrowserControls(false);
             resizeBrowser();
             NegativePlayer.LOGGER.info("Navegador de NegativePlayer creado para el proveedor {}.",
@@ -271,7 +271,7 @@ public final class NegativePlayerScreen extends Screen {
         if (!closeIssued && browser != null) {
             closeIssued = true;
             try {
-                browser.close(true);
+                browser.close();
             } catch (Throwable throwable) {
                 NegativePlayer.LOGGER.warn("No se pudo cerrar limpiamente el navegador de NegativePlayer.", throwable);
             }

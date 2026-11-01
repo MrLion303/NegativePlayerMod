@@ -1,6 +1,6 @@
-MCEF (Minecraft Chromium Embedded Framework) is included unmodified as a nested dependency.
-Project: https://github.com/CinemaMod/mcef
-License: GNU Lesser General Public License, version 2.1 (LGPL-2.1-only)
+Rinku (Chromium browser library) is included unmodified as a nested dependency.
+Project: https://github.com/Keksuccino/Rinku
+License: GNU Lesser General Public License, version 2.1 or later (LGPL-2.1-or-later)
 
                   GNU LESSER GENERAL PUBLIC LICENSE
                        Version 2.1, February 1999

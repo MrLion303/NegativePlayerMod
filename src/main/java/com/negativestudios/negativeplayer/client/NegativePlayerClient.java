@@ -1,6 +1,6 @@
 package com.negativestudios.negativeplayer.client;
 
-import com.cinemamod.mcef.MCEF;
+import de.keksuccino.rinku.Rinku;
 import com.negativestudios.negativeplayer.NegativePlayer;
 import com.negativestudios.negativeplayer.network.PlaybackControlPacket;
 import com.negativestudios.negativeplayer.network.PlaybackRequestPacket;
@@ -55,7 +55,7 @@ public final class NegativePlayerClient {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null) return;
 
-        if (MCEF.isInitialized()) {
+        if (Rinku.isInitialized()) {
             PlaybackRequestPacket request = pendingRequest;
             pendingRequest = null;
             try {
@@ -70,10 +70,10 @@ public final class NegativePlayerClient {
         long now = System.nanoTime();
         if (lastWaitLogNanos == 0L || now - lastWaitLogNanos >= 10_000_000_000L) {
             lastWaitLogNanos = now;
-            NegativePlayer.LOGGER.info("NegativePlayer está esperando a que MCEF termine de inicializar Chromium.");
+            NegativePlayer.LOGGER.info("NegativePlayer está esperando a que Rinku termine de inicializar Chromium.");
         }
         if (now - pendingSinceNanos >= 180_000_000_000L) {
-            NegativePlayer.LOGGER.error("MCEF no se inicializó en 180 segundos. Revisa los errores de MCEF y la conexión para descargar sus componentes nativos.");
+            NegativePlayer.LOGGER.error("Rinku no se inicializó en 180 segundos. Revisa los errores de Rinku y la conexión para descargar sus componentes nativos.");
             pendingRequest = null;
         }
     }
