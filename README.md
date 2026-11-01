@@ -51,7 +51,7 @@ Plataformas de escritorio soportadas por Rinku: Windows 10/11, macOS 11+ y Linux
 
 El servidor envía la solicitud con 60 ticks de anticipación. Cada cliente prepara Chromium y espera el tick de inicio del mundo para pedir la reproducción. La sincronización puede variar por carga de red, buffering y restricciones de cada proveedor.
 
-El navegador reproduce el audio directamente mediante Chromium; el volumen configurado se aplica al elemento de video cuando el proveedor lo expone al navegador. No se extraen streams privados ni se intenta evadir controles de las plataformas.
+El navegador inicia el video silenciado para permitir la reproducción automática de Chromium y restaura el volumen configurado cuando comienza. El audio de Minecraft se silencia temporalmente durante la reproducción y se restaura al cerrar el reproductor. No se extraen streams privados ni se intenta evadir controles de las plataformas.
 
 Si un video no permite inserción, requiere autenticación o no está compartido, no se puede reproducir desde el mod. Revisa `logs/latest.log` cuando aparezca un error.
 
@@ -62,6 +62,6 @@ Si un video no permite inserción, requiere autenticación o no está compartido
 - Minecraft 1.20.1
 - Forge 47.4.28
 
-`gradle clean build jarJar` genera el JAR de distribución `build/libs/NegativePlayer-0.3.2-all.jar`.
+`gradle clean build jarJar` genera el JAR de distribución `build/libs/NegativePlayer-0.3.3-all.jar`.
 
 Rinku está licenciado bajo LGPL-2.1-or-later y se distribuye sin modificar como biblioteca separada dentro del JAR. Se incluye la licencia en `LICENSE-RINKU.txt`; su código fuente está en https://github.com/Keksuccino/Rinku.
