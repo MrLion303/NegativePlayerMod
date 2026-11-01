@@ -51,6 +51,8 @@ public final class NegativePlayerScreen extends Screen {
             String playerUrl = VideoUrlValidator.toPlayerUrl(request.url());
             browser = Rinku.createBrowser(playerUrl, false);
             browser.useBrowserControls(false);
+            browser.setWindowlessFrameRate(60);
+            browser.setAudioMuted(false);
             resizeBrowser();
             NegativePlayer.LOGGER.info("Navegador de NegativePlayer creado para el proveedor {}.",
                     VideoUrlValidator.detectProvider(request.url()));
@@ -120,7 +122,7 @@ public final class NegativePlayerScreen extends Screen {
                 + "v.addEventListener('error',function(){window.location.hash='np-error';});}"
                 + "v.volume=" + volumeValue + ";v.muted=false;"
                 + "if(" + shouldPlay + "){if(v.paused){var p=v.play();if(p&&p.catch){p.catch(function(){window.location.hash='np-blocked';});}}}"
-                + "else if(!v.paused){v.pause();}"
+                + "else if(" + paused + " && !v.paused){v.pause();}"
                 + "if(v.ended){window.location.hash='np-ended';}"
                 + "}else{var s=(document.body&&document.body.innerText||'').toLowerCase();"
                 + "if(/video unavailable|this video is unavailable|file does not exist|you need access/.test(s)){window.location.hash='np-error';}}"
@@ -128,7 +130,7 @@ public final class NegativePlayerScreen extends Screen {
 
         try {
             Vector<String> frameIds = browser.getFrameIdentifiers();
-            for (Long frameId : frameIds) {
+            for (String frameId : frameIds) {
                 CefFrame frame = browser.getFrameByIdentifier(frameId);
                 if (frame != null && frame.isValid()) frame.executeJavaScript(script, "", 0);
             }
@@ -145,7 +147,7 @@ public final class NegativePlayerScreen extends Screen {
         if (browser == null) return;
         try {
             Vector<String> frameIds = browser.getFrameIdentifiers();
-            for (Long frameId : frameIds) {
+            for (String frameId : frameIds) {
                 CefFrame frame = browser.getFrameByIdentifier(frameId);
                 if (frame == null || !frame.isValid()) continue;
                 String frameUrl = frame.getURL();
