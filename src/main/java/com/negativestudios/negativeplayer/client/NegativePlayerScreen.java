@@ -4,7 +4,6 @@ import de.keksuccino.rinku.Rinku;
 import de.keksuccino.rinku.RinkuBrowser;
 import com.negativestudios.negativeplayer.NegativePlayer;
 import com.negativestudios.negativeplayer.network.PlaybackRequestPacket;
-import com.negativestudios.negativeplayer.util.VideoUrlValidator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -55,7 +54,7 @@ public final class NegativePlayerScreen extends Screen {
         muteMinecraftAudio();
 
         try {
-            String playerUrl = VideoUrlValidator.toPlayerUrl(request.url());
+            String playerUrl = LocalPlayerHttpServer.start(request.url());
             browser = Rinku.createBrowser(playerUrl, false);
             browser.useBrowserControls(false);
             browser.setWindowlessFrameRate(60);
@@ -139,17 +138,12 @@ public final class NegativePlayerScreen extends Screen {
             pollBrowserFrames();
 
             long now = System.nanoTime();
-            if (startRequested && state == PlaybackState.WAITING && browser.isTextureReady()
-                    && browser.getTextureIdentifier() != null
-                    && (sawPlaying || now - startRequestedAt >= 3_000_000_000L)) {
+            if (startRequested && state == PlaybackState.WAITING && sawPlaying
+                    && browser.isTextureReady() && browser.getTextureIdentifier() != null) {
                 state = PlaybackState.PLAYING;
                 playbackVisible = true;
                 fadeInStartedAt = now;
-                if (!sawPlaying) {
-                    NegativePlayer.LOGGER.warn("No se recibió la señal de reproducción de YouTube/Drive; se mostrará la textura del navegador para evitar mantener la pantalla negra.");
-                } else {
-                    NegativePlayer.LOGGER.info("El video comenzó a reproducirse; iniciando fade in.");
-                }
+                NegativePlayer.LOGGER.info("El video comenzó a reproducirse y su textura está lista; iniciando fade in.");
             }
 
             if (startRequested && !playbackVisible && state != PlaybackState.STOPPING
@@ -159,7 +153,7 @@ public final class NegativePlayerScreen extends Screen {
             }
         }
 
-        if (state == PlaybackState.STOPPING && stopStartedAt > 0L
+        if (state == PlaybackState.STOPPING && playbackVisible && stopStartedAt > 0L
                 && System.nanoTime() - stopStartedAt >= fadeOutDurationNanos()) {
             minecraft.setScreen(null);
         }
@@ -200,27 +194,23 @@ public final class NegativePlayerScreen extends Screen {
 
         String script = "(function(){try{"
                 + "var npVolume=" + volumeValue + ";window.__negativePlayerVolume=npVolume;"
+                + "if(window.__npSetVolume){window.__npSetVolume(" + volume + ");}"
+                + "if(window.__npPlayer){"
+                + "if(" + shouldPlay + "){"
+                + "try{window.__npPlayer.setVolume(" + volume + ");window.__npPlayer.unMute();window.__npPlayer.playVideo();}catch(e){}"
+                + "}else if(" + paused + "){try{window.__npPlayer.pauseVideo();}catch(e){}}"
+                + "}"
                 + "var npMark=function(s){try{window.name='negativeplayer:'+s;}catch(e){}"
                 + "try{if(location.hash!=='#np-'+s){history.replaceState(null,'',location.pathname+location.search+'#np-'+s);}}catch(e){}};"
-                + "if(location.hostname.indexOf('drive.google.com')!==-1){"
-                + "var st=document.getElementById('negativeplayer-style');"
-                + "if(!st){st=document.createElement('style');st.id='negativeplayer-style';"
-                + "st.textContent='html,body{margin:0!important;background:#000!important;overflow:hidden!important}"
-                + "video{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;"
-                + "object-fit:contain!important;background:#000!important;z-index:2147483647!important}';"
-                + "document.head.appendChild(st);}}"
                 + "var v=document.querySelector('video');"
                 + "if(v){"
                 + "if(!v.__negativePlayerBound){v.__negativePlayerBound=true;"
-                + "v.addEventListener('playing',function(){try{v.muted=false;"
-                + "v.volume=window.__negativePlayerVolume;}catch(e){}npMark('playing');});"
+                + "v.addEventListener('playing',function(){try{v.muted=false;v.volume=window.__negativePlayerVolume;}catch(e){}npMark('playing');});"
                 + "v.addEventListener('ended',function(){npMark('ended');});"
                 + "v.addEventListener('error',function(){npMark('error');});}"
                 + "if(" + shouldPlay + "){"
-                + "if(v.paused){"
-                + "v.muted=true;v.volume=0;"
-                + "var p=v.play();if(p&&p.catch){p.catch(function(){npMark('blocked');});}"
-                + "}else{v.muted=false;v.volume=npVolume;npMark('playing');}"
+                + "if(v.paused){v.muted=true;v.volume=0;var p=v.play();if(p&&p.catch){p.catch(function(){npMark('blocked');});}}"
+                + "else{v.muted=false;v.volume=npVolume;npMark('playing');}"
                 + "}else if(" + paused + "&&!v.paused){v.pause();}"
                 + "if(v.ended){npMark('ended');}"
                 + "}else{var s=(document.body&&document.body.innerText||'').toLowerCase();"
@@ -249,10 +239,7 @@ public final class NegativePlayerScreen extends Screen {
                 if (status.contains("negativeplayer:playing") || status.contains("#np-playing")) {
                     if (!sawPlaying) {
                         sawPlaying = true;
-                        state = PlaybackState.PLAYING;
-                        playbackVisible = true;
-                        fadeInStartedAt = System.nanoTime();
-                        NegativePlayer.LOGGER.info("Chromium confirmó el inicio de reproducción; iniciando fade in.");
+                        NegativePlayer.LOGGER.info("El reproductor confirmó que el video está reproduciéndose.");
                     }
                 } else if (status.contains("negativeplayer:ended") || status.contains("#np-ended")) {
                     if (state != PlaybackState.STOPPING) {
@@ -292,7 +279,7 @@ public final class NegativePlayerScreen extends Screen {
         state = PlaybackState.STOPPING;
         stopStartedAt = System.nanoTime();
         NegativePlayer.LOGGER.info("Cerrando la reproducción con fade out.");
-        if (request.fadeOutTicks() == 0) minecraft.setScreen(null);
+        if (!playbackVisible || request.fadeOutTicks() == 0) minecraft.setScreen(null);
     }
 
     private long fadeOutDurationNanos() {
@@ -372,6 +359,7 @@ public final class NegativePlayerScreen extends Screen {
             browser = null;
         }
 
+        LocalPlayerHttpServer.stop();
         restoreMinecraftAudio();
         super.removed();
     }
