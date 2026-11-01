@@ -62,6 +62,6 @@ Si un video no permite inserción, requiere autenticación o no está compartido
 - Minecraft 1.20.1
 - Forge 47.4.28
 
-`gradle clean build jarJar` genera el JAR de distribución `build/libs/NegativePlayer-0.3.0-all.jar`.
+`gradle clean build jarJar` genera el JAR de distribución `build/libs/NegativePlayer-0.3.2-all.jar`.
 
 Rinku está licenciado bajo LGPL-2.1-or-later y se distribuye sin modificar como biblioteca separada dentro del JAR. Se incluye la licencia en `LICENSE-RINKU.txt`; su código fuente está en https://github.com/Keksuccino/Rinku.
